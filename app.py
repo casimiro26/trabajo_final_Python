@@ -13,13 +13,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Palabras clave para cada área (simulación)
 AREA_KEYWORDS = {
-    "Mesa de Partes": ["atención al cliente", "gestión documental", "archivos", "oficina"],
-    "Logística": ["almacén", "inventario", "distribución", "transporte"],
-    "Recursos Humanos": ["selección de personal", "capacitación", "nomina", "contratación"],
-    "Diseño Gráfico": ["diseño", "gráfico", "photoshop", "ilustración"],
-    "Locutor/Maestro de Ceremonia": ["locución", "ceremonia", "voz", "presentación"],
-    "Limpieza": ["limpieza", "mantenimiento", "higiene", "orden"],
-    "Secretaría": ["secretaria", "asistente", "organización", "correspondencia"]
+    "Área de Imagen Institucional y Relaciones Públicas": ["relaciones públicas", "comunicación", "eventos", "prensa"],
+    "Secretaría y Atención al Ciudadano": ["atención al cliente", "secretaría", "correspondencia", "oficina"],
+    "ATM": ["mantenimiento", "transporte", "logística", "almacén"],
+    "Área de Informática": ["informática", "programación", "redes", "soporte técnico"],
+    "Área de Administración": ["administración", "gestión", "contabilidad", "recursos humanos"]
 }
 
 # Simulación de análisis de Machine Learning
@@ -31,23 +29,21 @@ def analyze_cv(file_path, selected_area):
             for page in reader.pages:
                 text += page.extract_text() or ""
         
-        percentages = {}
-        for area, keywords in AREA_KEYWORDS.items():
-            score = 0
-            for keyword in keywords:
-                if keyword.lower() in text.lower():
-                    score += 20  # Aumentar el puntaje por cada coincidencia
-            score = min(100, score + random.randint(-10, 10))
-            percentages[area] = max(0, score)
+        # Evaluar solo el área seleccionada
+        keywords = AREA_KEYWORDS.get(selected_area, [])
+        score = 0
+        for keyword in keywords:
+            if keyword.lower() in text.lower():
+                score += 25  # Aumentar el puntaje por cada coincidencia
+        score = min(100, score + random.randint(-10, 10))
+        score = max(0, score)
         
-        score = percentages.get(selected_area, 0)
         passes = score >= 50
-        return percentages, passes, score
+        return passes, score
     except Exception:
-        percentages = {area: random.randint(20, 80) for area in AREA_KEYWORDS}
-        score = percentages.get(selected_area, 0)
+        score = random.randint(20, 80)
         passes = score >= 50
-        return percentages, passes, score
+        return passes, score
 
 @app.route('/')
 def welcome():
@@ -75,10 +71,9 @@ def upload_cv():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)
         
-        percentages, passes, score = analyze_cv(file_path, selected_area)
+        passes, score = analyze_cv(file_path, selected_area)
         
         return render_template('result.html', 
-                             percentages=percentages, 
                              passes=passes, 
                              score=score, 
                              selected_area=selected_area)

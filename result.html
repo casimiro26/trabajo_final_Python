@@ -6,54 +6,81 @@
     <title>Resultado de Evaluación - Municipalidad de Yarowilca</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f4f8;
+            font-family: 'Poppins', sans-serif;
+            background: url('https://images.unsplash.com/photo-1593642634315-48c585d95932') no-repeat center center fixed;
+            background-size: cover;
             margin: 0;
             padding: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
         }
         .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
             text-align: center;
             width: 500px;
+            z-index: 1;
+            animation: slideIn 1s ease-in-out;
         }
         h1 {
             color: #1a73e8;
-            font-size: 24px;
+            font-size: 28px;
         }
         .result {
             margin: 20px 0;
             font-size: 18px;
         }
         .pass {
-            color: green;
+            color: #34a853;
             font-weight: bold;
+            font-size: 24px;
         }
         .fail {
-            color: red;
+            color: #ea4335;
             font-weight: bold;
+            font-size: 24px;
         }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            margin: 5px 0;
+        .icon {
+            font-size: 50px;
+            margin-bottom: 20px;
         }
         a {
             display: inline-block;
             margin-top: 20px;
             color: #1a73e8;
             text-decoration: none;
+            padding: 10px 20px;
+            border: 2px solid #1a73e8;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
         }
         a:hover {
-            text-decoration: underline;
+            background-color: #1a73e8;
+            color: white;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 2;
         }
     </style>
 </head>
@@ -61,55 +88,21 @@
     <div class="container">
         <h1>Resultado de Evaluación</h1>
         <div class="result">
-            <p>Área a la que postulas: {{ selected_area }}</p>
-            <p>Puntuación: {{ score }}%</p>
+            <p>Área a la que postulaste: {{ selected_area }}</p>
             {% if passes %}
-                <p class="pass">¡Aprobado! Tu CV ha sido enviado a Recursos Humanos.</p>
+                <div class="icon">✅</div>
+                <p class="pass">¡Aprobado!</p>
+                <p>Tu CV ha sido enviado a Recursos Humanos.</p>
             {% else %}
-                <p class="fail">No aprobado. Tu puntuación es menor al 50% requerido.</p>
+                <div class="icon">❌</div>
+                <p class="fail">No Aprobado</p>
+                <p>Tu puntuación es menor al 50% requerido.</p>
             {% endif %}
         </div>
-        <h3>Porcentajes por área:</h3>
-        <ul>
-            <li>Mesa de Partes: {{ percentages['Mesa de Partes'] }}%</li>
-            <li>Logística: {{ percentages['Logística'] }}%</li>
-            <li>Recursos Humanos: {{ percentages['Recursos Humanos'] }}%</li>
-            <li>Diseño Gráfico: {{ percentages['Diseño Gráfico'] }}%</li>
-            <li>Locutor/Maestro de Ceremonia: {{ percentages['Locutor/Maestro de Ceremonia'] }}%</li>
-            <li>Limpieza: {{ percentages['Limpieza'] }}%</li>
-            <li>Secretaría: {{ percentages['Secretaría'] }}%</li>
-        </ul>
-
-        <!-- Gráfico de porcentajes -->
-        ```chartjs
-        {
-            "type": "doughnut",
-            "data": {
-                "labels": ["Mesa de Partes", "Logística", "Recursos Humanos", "Diseño Gráfico", "Locutor/Maestro de Ceremonia", "Limpieza", "Secretaría"],
-                "datasets": [{
-                    "label": "Idoneidad",
-                    "data": [{{ percentages['Mesa de Partes'] }}, {{ percentages['Logística'] }}, {{ percentages['Recursos Humanos'] }}, {{ percentages['Diseño Gráfico'] }}, {{ percentages['Locutor/Maestro de Ceremonia'] }}, {{ percentages['Limpieza'] }}, {{ percentages['Secretaría'] }}],
-                    "backgroundColor": ["#1a73e8", "#34a853", "#fbbc05", "#ea4335", "#4285f4", "#fbca04", "#34a853"],
-                    "borderColor": ["#1a73e8", "#34a853", "#fbbc05", "#ea4335", "#4285f4", "#fbca04", "#34a853"],
-                    "borderWidth": 1
-                }]
-            },
-            "options": {
-                "responsive": true,
-                "plugins": {
-                    "legend": {
-                        "position": "top"
-                    },
-                    "title": {
-                        "display": true,
-                        "text": "Distribución de Idoneidad por Área"
-                    }
-                }
-            }
-        }
-        ```
-
         <a href="index.html">Volver a la bienvenida</a>
+    </div>
+    <div class="chatbot">
+        <iframe src="https://chatbot.example.com/epEnKLh3Dn9jR8Ew1VaBWBzudHqymH13" width="300" height="400" frameborder="0"></iframe>
     </div>
 </body>
 </html>
