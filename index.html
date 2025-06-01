@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Selección de Personal - Municipalidad de Yarowilca</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+        h1 {
+            color: #1a73e8;
+            font-size: 24px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        select, input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #1a73e8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        .error {
+            color: red;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Municipalidad Provincial de Yarowilca</h1>
+        <h2>Subir CV para Evaluación</h2>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form action="app.py" method="post" enctype="multipart/form-data">
+            <label for="area">Área a la que estás postulando:</label>
+            <select name="area" id="area" required>
+                <option value="Mesa de Partes">Mesa de Partes</option>
+                <option value="Logística">Logística</option>
+                <option value="Recursos Humanos">Recursos Humanos</option>
+                <option value="Diseño Gráfico">Diseño Gráfico</option>
+                <option value="Locutor/Maestro de Ceremonia">Locutor/Maestro de Ceremonia</option>
+                <option value="Limpieza">Limpieza</option>
+                <option value="Secretaría">Secretaría</option>
+            </select>
+            <label for="cv">Sube tu CV (PDF):</label>
+            <input type="file" name="cv" id="cv" accept=".pdf" required>
+            <a href="result.html" class="btn">enviar</a>
+        </form>
+    </div>
+</body>
+</html>

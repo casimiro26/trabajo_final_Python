@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado de Evaluación - Municipalidad de Yarowilca</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 500px;
+        }
+        h1 {
+            color: #1a73e8;
+            font-size: 24px;
+        }
+        .result {
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .pass {
+            color: green;
+            font-weight: bold;
+        }
+        .fail {
+            color: red;
+            font-weight: bold;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Resultado de Evaluación</h1>
+        <div class="result">
+            <p>Área a la que postulas: {{ selected_area }}</p>
+            <p>Puntuación: {{ score }}%</p>
+            {% if passes %}
+                <p class="pass">¡Aprobado! Tu CV ha sido enviado a Recursos Humanos.</p>
+            {% else %}
+                <p class="fail">No aprobado. Tu puntuación es menor al 50% requerido.</p>
+            {% endif %}
+        </div>
+        <h3>Porcentajes por área:</h3>
+        <ul>
+            <li>Mesa de Partes: {{ percentages['Mesa de Partes'] }}%</li>
+            <li>Logística: {{ percentages['Logística'] }}%</li>
+            <li>Recursos Humanos: {{ percentages['Recursos Humanos'] }}%</li>
+            <li>Diseño Gráfico: {{ percentages['Diseño Gráfico'] }}%</li>
+            <li>Locutor/Maestro de Ceremonia: {{ percentages['Locutor/Maestro de Ceremonia'] }}%</li>
+            <li>Limpieza: {{ percentages['Limpieza'] }}%</li>
+            <li>Secretaría: {{ percentages['Secretaría'] }}%</li>
+        </ul>
+
+        <!-- Gráfico de porcentajes -->
+        ```chartjs
+        {
+            "type": "doughnut",
+            "data": {
+                "labels": ["Mesa de Partes", "Logística", "Recursos Humanos", "Diseño Gráfico", "Locutor/Maestro de Ceremonia", "Limpieza", "Secretaría"],
+                "datasets": [{
+                    "label": "Idoneidad",
+                    "data": [{{ percentages['Mesa de Partes'] }}, {{ percentages['Logística'] }}, {{ percentages['Recursos Humanos'] }}, {{ percentages['Diseño Gráfico'] }}, {{ percentages['Locutor/Maestro de Ceremonia'] }}, {{ percentages['Limpieza'] }}, {{ percentages['Secretaría'] }}],
+                    "backgroundColor": ["#1a73e8", "#34a853", "#fbbc05", "#ea4335", "#4285f4", "#fbca04", "#34a853"],
+                    "borderColor": ["#1a73e8", "#34a853", "#fbbc05", "#ea4335", "#4285f4", "#fbca04", "#34a853"],
+                    "borderWidth": 1
+                }]
+            },
+            "options": {
+                "responsive": true,
+                "plugins": {
+                    "legend": {
+                        "position": "top"
+                    },
+                    "title": {
+                        "display": true,
+                        "text": "Distribución de Idoneidad por Área"
+                    }
+                }
+            }
+        }
+        ```
+
+        <a href="index.html">Volver a la bienvenida</a>
+    </div>
+</body>
+</html>
