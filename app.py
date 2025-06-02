@@ -1,27 +1,38 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for, jsonify
 import os
-import PyPDF2
 import random
+import PyPDF2
+from datetime import datetime
 
 app = Flask(__name__)
 
-# Directorio para guardar los CVs subidos
+# Directorio para guardar archivos subidos
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Palabras clave para cada área (simulación)
-AREA_KEYWORDS = {
-    "Área de Imagen Institucional y Relaciones Públicas": ["relaciones públicas", "comunicación", "eventos", "prensa"],
-    "Secretaría y Atención al Ciudadano": ["atención al cliente", "secretaría", "correspondencia", "oficina"],
-    "ATM": ["mantenimiento", "transporte", "logística", "almacén"],
-    "Área de Informática": ["informática", "programación", "redes", "soporte técnico"],
-    "Área de Administración": ["administración", "gestión", "contabilidad", "recursos humanos"]
+# Almacenamiento de resultados (simulación de base de datos)
+evaluations = []
+
+# Áreas de evaluación y sus pesos
+EVALUATION_AREAS = {
+    "Logística": 0.2,
+    "Recursos Humanos": 0.6,
+    "Mesa de Partes": 0.2
 }
 
-# Simulación de análisis de Machine Learning
-def analyze_cv(file_path, selected_area):
+# Áreas disponibles para postular
+POSTULATION_AREAS = [
+    "Área de Imagen Institucional y Relaciones Públicas",
+    "Secretaría y Atención al Ciudadano",
+    "ATM",
+    "Área de Informática",
+    "Área de Administración"
+]
+
+# Simulación de análisis del CV
+def analyze_cv(file_path):
     try:
         with open(file_path, 'rb') as file:
             reader = PyPDF2.PdfReader(file)
@@ -29,55 +40,91 @@ def analyze_cv(file_path, selected_area):
             for page in reader.pages:
                 text += page.extract_text() or ""
         
-        # Evaluar solo el área seleccionada
-        keywords = AREA_KEYWORDS.get(selected_area, [])
-        score = 0
-        for keyword in keywords:
-            if keyword.lower() in text.lower():
-                score += 25  # Aumentar el puntaje por cada coincidencia
-        score = min(100, score + random.randint(-10, 10))
-        score = max(0, score)
+        # Simular puntajes para cada área (valores aleatorios para simulación)
+        scores = {area: random.randint(0, 100) for area in EVALUATION_AREAS}
         
-        passes = score >= 50
-        return passes, score
+        # Calcular puntaje total ponderado
+        total_score = sum(scores[area] * weight for area, weight in EVALUATION_AREAS.items())
+        
+        # Determinar resultado y mensaje
+        if total_score >= 70:
+            result = "Aprobado"
+            message = "¡Felicidades! Cumples todas las expectativas. 🎉"
+            icon = "✅"
+        elif total_score >= 50:
+            result = "Observado"
+            message = "Se cumplen parcialmente los requisitos. Mejora tu presentación. 📝"
+            icon = "⚠️"
+        else:
+            result = "Desaprobado"
+            message = "No cumple con las expectativas. Intenta de nuevo. 😔"
+            icon = "❌"
+            
+        return scores, total_score, result, message, icon
     except Exception:
-        score = random.randint(20, 80)
-        passes = score >= 50
-        return passes, score
+        # En caso de error, simular puntajes
+        scores = {area: random.randint(0, 100) for area in EVALUATION_AREAS}
+        total_score = sum(scores[area] * weight for area, weight in EVALUATION_AREAS.items())
+        if total_score >= 70:
+            result = "Aprobado"
+            message = "¡Felicidades! Cumples todas las expectativas. 🎉"
+            icon = "✅"
+        elif total_score >= 50:
+            result = "Observado"
+            message = "Se cumplen parcialmente los requisitos. Mejora tu presentación. 📝"
+            icon = "⚠️"
+        else:
+            result = "Desaprobado"
+            message = "No cumple con las expectativas. Intenta de nuevo. 😔"
+            icon = "❌"
+        return scores, total_score, result, message, icon
 
 @app.route('/')
 def welcome():
-    return render_template('welcome.html')
+    return render_template('welcome.html', areas=POSTULATION_AREAS)
 
-@app.route('/index')
-def index():
-    return render_template('index.html')
+@app.route('/seleccion-area/<area>')
+def seleccion_area(area):
+    if area not in POSTULATION_AREAS:
+        return redirect(url_for('welcome'))
+    return render_template('seleccion-area.html', area=area)
 
 @app.route('/upload', methods=['POST'])
 def upload_cv():
-    if 'cv' not in request.files:
-        return render_template('index.html', error="No se seleccionó ningún archivo")
+    area = request.form.get('area')
+    if 'file' not in request.files or not area:
+        return redirect(url_for('seleccion_area', area=area))
     
-    file = request.files['cv']
-    selected_area = request.form.get('area')
-    
-    if not selected_area:
-        return render_template('index.html', error="Por favor, selecciona un área a la que postulas")
-    
+    file = request.files['file']
     if file.filename == '':
-        return render_template('index.html', error="No se seleccionó ningún archivo")
+        return redirect(url_for('seleccion_area', area=area))
     
-    if file and file.filename.endswith('.pdf'):
+    if file and (file.filename.endswith('.pdf') or file.filename.endswith('.docx')):
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)
         
-        passes, score = analyze_cv(file_path, selected_area)
+        # Analizar el CV
+        scores, total_score, result, message, icon = analyze_cv(file_path)
         
-        return render_template('result.html', 
-                             passes=passes, 
-                             score=score, 
-                             selected_area=selected_area)
-    return render_template('index.html', error="Por favor, sube un archivo PDF")
-    
+        # Guardar evaluación
+        evaluation = {
+            'area': area,
+            'file': file.filename,
+            'scores': scores,
+            'total_score': total_score,
+            'result': result,
+            'message': message,
+            'icon': icon,
+            'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        evaluations.append(evaluation)
+        
+        return render_template('resultado.html', evaluation=evaluation)
+    return redirect(url_for('seleccion_area', area=area))
+
+@app.route('/evaluaciones')
+def evaluaciones():
+    return render_template('evaluaciones.html', evaluations=evaluations)
+
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

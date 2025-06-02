@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenida - Municipalidad de Yarowilca</title>
+    <title>Subir CV - Municipalidad de Yarowilca</title>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1a73e8, #34a853);
+            background: linear-gradient(135deg, #34a853, #1a73e8);
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
             position: relative;
         }
         canvas {
@@ -26,59 +25,68 @@
             z-index: 0;
         }
         .container {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
             border-radius: 20px;
-            padding: 40px;
+            padding: 35px;
             width: 90%;
-            max-width: 900px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
             color: white;
             z-index: 1;
-            animation: fadeIn 1.5s ease-in-out;
+            animation: slideIn 1s ease-in-out;
         }
         .logo {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
         }
         h1 {
-            font-size: 36px;
-            margin-bottom: 20px;
+            font-size: 30px;
+            margin-bottom: 25px;
             text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
         }
-        p {
-            font-size: 18px;
-            margin-bottom: 30px;
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .area-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 25px;
-        }
-        .card {
-            background: linear-gradient(145deg, #fbbc05, #ea4335);
+        .upload-label {
+            background: linear-gradient(145deg, #4285f4, #34a853);
             border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            transition: transform 0.4s, box-shadow 0.4s;
-            text-decoration: none;
-            color: white;
-            position: relative;
-            transform-style: preserve-3d;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 20px;
         }
-        .card:hover {
-            transform: translateY(-10px) rotateX(10deg) rotateY(10deg);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        .upload-label:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
         }
-        .card-icon {
-            font-size: 50px;
+        .upload-icon {
+            font-size: 60px;
             margin-bottom: 15px;
-            animation: bounce 2s infinite;
+            animation: pulse 2s infinite;
         }
-        h3 {
-            font-size: 20px;
-            margin: 0;
+        input[type="file"] {
+            display: none;
+        }
+        .btn {
+            background: linear-gradient(145deg, #fbbc05, #ea4335);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(251, 188, 5, 0.7);
         }
         .chatbot {
             position: fixed;
@@ -133,13 +141,13 @@
         .chatbot-content:hover {
             display: block;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
         }
         @media (max-width: 600px) {
             .container {
@@ -147,10 +155,7 @@
                 padding: 20px;
             }
             h1 {
-                font-size: 28px;
-            }
-            .card {
-                padding: 15px;
+                font-size: 24px;
             }
         }
     </style>
@@ -159,18 +164,18 @@
     <canvas id="particles"></canvas>
     <div class="container">
         <header>
-            <img src="" alt="Logo Municipalidad" class="logo">
-            <h1>🌟 ¡Únete a la Municipalidad Provincial de Yarowilca! 🌟</h1>
+            <img src="https://via.placeholder.com/150x50?text=Logo+Yarowilca" alt="Logo Municipalidad" class="logo">
+            <h1>📄 Sube tu CV para {{ area }}</h1>
         </header>
-        <p>Elige un área para postular y comienza tu camino hacia el éxito:</p>
-        <div class="area-cards">
-            {% for area in areas %}
-            <a href="seleccion-area.html" class="card">
-                <div class="card-icon">📋</div>
-                <h3>{{ postula ahora }}</h3>
-            </a>
-            {% endfor %}
-        </div>
+        <form action="/upload" method="post" enctype="multipart/form-data" class="upload-form">
+            <input type="hidden" name="area" value="{{ area }}">
+            <label for="file" class="upload-label">
+                <span class="upload-icon">📤</span>
+                <span>Sube tu CV (PDF o Word)</span>
+            </label>
+            <input type="file" id="file" name="file" accept=".pdf,.docx" required>
+            <button type="submit" class="btn">🚀 Enviar a Evaluación</button>
+        </form>
     </div>
     <div class="chatbot">
         <div class="chatbot-icon">💬</div>
@@ -184,7 +189,6 @@
     </div>
     <script src="/static/chatbot.js"></script>
     <script>
-        // Partículas animadas
         const canvas = document.getElementById('particles');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
