@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, jsonify
+from flask import Flask, request, render_template, redirect, url_for
 import os
 import random
 import PyPDF2
@@ -40,7 +40,7 @@ def analyze_cv(file_path):
             for page in reader.pages:
                 text += page.extract_text() or ""
         
-        # Simular puntajes para cada área (valores aleatorios para simulación)
+        # Simular puntajes para cada área
         scores = {area: random.randint(0, 100) for area in EVALUATION_AREAS}
         
         # Calcular puntaje total ponderado
@@ -61,7 +61,8 @@ def analyze_cv(file_path):
             icon = "❌"
             
         return scores, total_score, result, message, icon
-    except Exception:
+    except Exception as e:
+        print(f"Error analyzing CV: {e}")
         # En caso de error, simular puntajes
         scores = {area: random.randint(0, 100) for area in EVALUATION_AREAS}
         total_score = sum(scores[area] * weight for area, weight in EVALUATION_AREAS.items())
@@ -80,24 +81,18 @@ def analyze_cv(file_path):
         return scores, total_score, result, message, icon
 
 @app.route('/')
-def welcome():
-    return render_template('welcome.html', areas=POSTULATION_AREAS)
-
-@app.route('/seleccion-area/<area>')
-def seleccion_area(area):
-    if area not in POSTULATION_AREAS:
-        return redirect(url_for('welcome'))
-    return render_template('seleccion-area.html', area=area)
+def index():
+    return render_template('seleccion-area.html', areas=POSTULATION_AREAS)
 
 @app.route('/upload', methods=['POST'])
 def upload_cv():
     area = request.form.get('area')
-    if 'file' not in request.files or not area:
-        return redirect(url_for('seleccion_area', area=area))
+    if not area or area not in POSTULATION_AREAS or 'file' not in request.files:
+        return redirect(url_for('index'))
     
     file = request.files['file']
     if file.filename == '':
-        return redirect(url_for('seleccion_area', area=area))
+        return redirect(url_for('index'))
     
     if file and (file.filename.endswith('.pdf') or file.filename.endswith('.docx')):
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -111,7 +106,7 @@ def upload_cv():
             'area': area,
             'file': file.filename,
             'scores': scores,
-            'total_score': total_score,
+            'total_score': round(total_score, 2),  # Redondear para mejor visualización
             'result': result,
             'message': message,
             'icon': icon,
@@ -120,7 +115,8 @@ def upload_cv():
         evaluations.append(evaluation)
         
         return render_template('resultado.html', evaluation=evaluation)
-    return redirect(url_for('seleccion_area', area=area))
+    
+    return redirect(url_for('index'))
 
 @app.route('/evaluaciones')
 def evaluaciones():

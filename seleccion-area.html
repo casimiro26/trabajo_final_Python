@@ -24,17 +24,62 @@
             height: 100%;
             z-index: 0;
         }
+        .main-container {
+            display: flex;
+            width: 90%;
+            max-width: 1000px;
+            gap: 30px;
+            z-index: 1;
+        }
+        .sidebar {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            border-radius: 15px;
+            padding: 20px;
+            width: 250px;
+            color: white;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            animation: slideIn 1s ease-in-out;
+        }
+        .sidebar h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+        }
+        .area-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .area-btn {
+            background: linear-gradient(145deg, #4285f4, #34a853);
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: left;
+        }
+        .area-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        .area-btn.selected {
+            background: linear-gradient(145deg, #fbbc05, #ea4335);
+            box-shadow: 0 0 20px rgba(251, 188, 5, 0.7);
+        }
         .container {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(12px);
             border-radius: 20px;
             padding: 35px;
-            width: 90%;
-            max-width: 600px;
+            flex: 1;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
             color: white;
-            z-index: 1;
             animation: slideIn 1s ease-in-out;
         }
         .logo {
@@ -66,6 +111,12 @@
             transform: scale(1.05);
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
         }
+        .upload-label.disabled {
+            background: linear-gradient(145deg, #ccc, #aaa);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
         .upload-icon {
             font-size: 60px;
             margin-bottom: 15px;
@@ -87,6 +138,12 @@
         .btn:hover {
             transform: scale(1.1);
             box-shadow: 0 0 20px rgba(251, 188, 5, 0.7);
+        }
+        .btn:disabled {
+            background: linear-gradient(145deg, #ccc, #aaa);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         .chatbot {
             position: fixed;
@@ -149,7 +206,15 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.2); }
         }
-        @media (max-width: 600px) {
+        @media (max-width: 800px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .sidebar {
+                width: 100%;
+                max-width: 400px;
+            }
             .container {
                 width: 95%;
                 padding: 20px;
@@ -157,25 +222,40 @@
             h1 {
                 font-size: 24px;
             }
+            /* Añadir esto a tu estilo para darle otro estilo visual */
+.btn.alt {
+    background: linear-gradient(145deg, #00c6ff, #0072ff);
+    font-weight: bold;
+}
         }
     </style>
 </head>
 <body>
     <canvas id="particles"></canvas>
-    <div class="container">
-        <header>
-            <img src="https://via.placeholder.com/150x50?text=Logo+Yarowilca" alt="Logo Municipalidad" class="logo">
-            <h1>📄 Sube tu CV para {{ area }}</h1>
-        </header>
-        <form action="resultado.html" method="post" enctype="multipart/form-data" class="upload-form">
-            <input type="hidden" name="area" value="{{ area }}">
-            <label for="file" class="upload-label">
-                <span class="upload-icon">📤</span>
-                <span>Sube tu CV (PDF o Word)</span>
-            </label>
-            <input type="file" id="file" name="file" accept=".pdf,.docx" required>
-            <button type="resultado.html" class="btn">🚀 Enviar a Evaluación</button>
-        </form>
+    <div class="main-container">
+        <div class="sidebar">
+            <h2>Áreas Disponibles 📋</h2>
+            <div class="area-list">
+                <button class="area-btn" data-area="Área de Imagen Institucional y Relaciones Públicas">Área de Imagen Institucional y Relaciones Públicas</button>
+                <button class="area-btn" data-area="Secretaría y Atención al Ciudadano">Secretaría y Atención al Ciudadano</button>
+                <button class="area-btn" data-area="ATM">ATM</button>
+                <button class="area-btn" data-area="Área de Informática">Área de Informática</button>
+                <button class="area-btn" data-area="Área de Administración">Área de Administración</button>
+            </div>
+        </div>
+        <div class="container">
+            <header>
+                <h1>📄 Sube tu CV para <span id="selected-area">seleccionar un área</span></h1>
+            </header>
+                <input type="hidden" name="area" id="area-input" value="">
+                <label for="file" class="upload-label disabled" id="upload-label">
+                    <span class="upload-icon">📤</span>
+                    <span>Sube tu CV (PDF o Word)</span>
+                </label>
+                <input type="file" id="file" name="file" accept=".pdf,.docx">
+                <button onclick="location.href='resultado.html'" class="btn alt" id="submit-btn">🚀 Enviar mi CV</button>
+            </form>
+        </div>
     </div>
     <div class="chatbot">
         <div class="chatbot-icon">💬</div>
@@ -236,6 +316,39 @@
         }
         init();
         animate();
+
+        // Lógica para seleccionar área
+        const areaButtons = document.querySelectorAll('.area-btn');
+        const areaInput = document.getElementById('area-input');
+        const selectedAreaSpan = document.getElementById('selected-area');
+        const uploadLabel = document.getElementById('upload-label');
+        const fileInput = document.getElementById('file');
+        const submitBtn = document.getElementById('submit-btn');
+
+        areaButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remover clase 'selected' de todos los botones
+                areaButtons.forEach(btn => btn.classList.remove('selected'));
+                // Añadir clase 'selected' al botón clickeado
+                button.classList.add('selected');
+                // Actualizar el área seleccionada
+                const selectedArea = button.getAttribute('data-area');
+                areaInput.value = selectedArea;
+                selectedAreaSpan.textContent = selectedArea;
+                // Habilitar la subida de archivo y el botón de enviar
+                uploadLabel.classList.remove('disabled');
+                fileInput.disabled = false;
+                fileInput.required = true;
+                // Habilitar el botón de enviar solo si hay un archivo seleccionado
+                fileInput.addEventListener('change', () => {
+                    if (fileInput.files.length > 0) {
+                        submitBtn.disabled = false;
+                    } else {
+                        submitBtn.disabled = true;
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
